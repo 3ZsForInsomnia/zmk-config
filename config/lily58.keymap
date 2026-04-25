@@ -1,61 +1,178 @@
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/outputs.h>
 
 / {
-    keymap {
-        compatible = "zmk,keymap";
-
-        default_layer {
-            display-name = "Base";
-            bindings = <
-&kp ESC   &kp N1 &kp N2 &kp N3   &kp N4   &kp N5                       &kp N6 &kp N7    &kp N8    &kp N9   &kp N0   &kp GRAVE
-&kp TAB   &kp Q  &kp W  &kp E    &kp R    &kp T                        &kp Y  &kp U     &kp I     &kp O    &kp P    &kp MINUS
-&kp LCTRL &kp A  &kp S  &kp D    &kp F    &kp G                        &kp H  &kp J     &kp K     &kp L    &kp SEMI &kp SQT
-&kp LSHFT &kp Z  &kp X  &kp C    &kp V    &kp B  &kp LBKT     &kp RBKT &kp N  &kp M     &kp COMMA &kp DOT  &kp FSLH &kp RSHFT
-                        &kp LGUI &kp LALT &mo 1  &kp SPACE    &kp RET  &mo 2  &kp BSPC  &kp RALT
-            >;
+    // ============================================================
+    // Custom behaviors: hold-taps and tap-dances
+    // ============================================================
+    behaviors {
+        // Hold-tap for Shift on Tab and Shift on Enter.
+        // tap-preferred: short overlap with another key resolves to the tap.
+        // Short term + quick-tap-ms keeps Tab snappy in autocomplete.
+        hm_shift: hold_mod_shift {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <175>;
+            quick-tap-ms = <150>;
+            bindings = <&kp>, <&kp>;
         };
 
-        lower_layer {
-            display-name = "Lower";
-            bindings = <
-&kp F1    &kp F2    &kp F3    &kp F4    &kp F5    &kp F6                              &kp F7    &kp F8    &kp F9    &kp F10   &kp F11   &kp F12
-&trans    &trans    &trans    &trans    &trans    &trans                              &trans    &trans    &trans    &trans    &trans    &trans
-&trans    &trans    &trans    &trans    &trans    &trans                              &kp LEFT  &kp DOWN  &kp UP    &kp RIGHT &trans    &trans
-&trans    &trans    &trans    &trans    &trans    &trans    &trans         &trans     &trans    &trans    &trans    &trans    &trans    &trans
-                              &trans    &trans    &trans    &trans         &trans     &trans    &trans    &trans
-            >;
+        // Hold-tap for Ctrl on Esc (Caps Lock position).
+        // Slightly longer term since Ctrl shortcuts feel better with a firm hold.
+        hm_ctrl: hold_mod_ctrl {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <200>;
+            quick-tap-ms = <150>;
+            bindings = <&kp>, <&kp>;
         };
 
-        raise_layer {
-            display-name = "Raise";
-            bindings = <
-&kp GRAVE &kp N1    &kp N2    &kp N3    &kp N4    &kp N5                              &kp N6    &kp N7    &kp N8    &kp N9    &kp N0    &trans
-&trans    &trans    &trans    &trans    &trans    &trans                              &trans    &kp UNDER &kp PLUS  &kp LBRC  &kp RBRC  &kp PIPE
-&trans    &trans    &trans    &trans    &trans    &trans                              &trans    &kp MINUS &kp EQUAL &kp LBKT  &kp RBKT  &kp BSLH
-&trans    &trans    &trans    &trans    &trans    &trans    &trans         &trans     &trans    &trans    &trans    &trans    &trans    &trans
-                              &trans    &trans    &trans    &trans         &trans     &trans    &trans    &trans
-            >;
+        // Layer-tap for Space (snappy: 150ms term, 120ms quick-tap).
+        // Thumbs rarely hold accidentally; safe to be aggressive.
+        lt_space: layer_tap_space {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            tapping-term-ms = <150>;
+            quick-tap-ms = <120>;
+            bindings = <&mo>, <&kp>;
         };
 
-        adjust_layer {
-            display-name = "Adjust";
-            bindings = <
-&bt BT_CLR  &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4                            &trans &trans &trans &trans &trans &trans
-&trans      &trans       &trans       &trans       &trans       &trans                                  &trans &trans &trans &trans &trans &trans
-&trans      &trans       &trans       &trans       &trans       &trans                                  &trans &trans &trans &trans &trans &trans
-&trans      &trans       &trans       &trans       &trans       &trans       &trans         &trans      &trans &trans &trans &trans &trans &trans
-                                      &trans       &trans       &trans       &trans         &trans      &trans &trans &trans
-            >;
+        // Tap = ;  Double-tap = :
+        td_semi: tap_dance_semi {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&kp SEMI>, <&kp COLON>;
+        };
+
+        // Tap = '  Double-tap = "
+        td_quote: tap_dance_quote {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&kp SQT>, <&kp DQT>;
         };
     };
 
+    // ============================================================
+    // Conditional layer: hold both Sym (1) and Nav (2) → System (4)
+    // ============================================================
     conditional_layers {
         compatible = "zmk,conditional-layers";
-        tri_layer {
+        sys_layer {
             if-layers = <1 2>;
-            then-layer = <3>;
+            then-layer = <4>;
+        };
+    };
+
+    // ============================================================
+    // Keymap: 5 layers
+    // ============================================================
+    keymap {
+        compatible = "zmk,keymap";
+
+        // ----------------------------------------------------------------
+        // Layer 0: Base
+        // ----------------------------------------------------------------
+        // - Top-left: Tab (tap) / LShift (hold)
+        // - Caps Lock pos: Esc (tap) / LCtrl (hold)
+        // - Right pinky outer: Enter (tap) / RShift (hold)
+        // - Inner extras (row 3): [ and ] for fast bracket access
+        // - Thumbs: LGUI LALT BSPC SPACE/Sym | SPACE/Nav BSPC RALT RGUI
+        // - ; / : and ' / " on home row via tap-dance
+        base_layer {
+            display-name = "Base";
+            bindings = <
+&kp ESC               &kp N1 &kp N2 &kp N3 &kp N4 &kp N5                                                 &kp N6   &kp N7   &kp N8    &kp N9  &kp N0   &kp GRAVE
+&hm_shift LSHFT TAB   &kp Q  &kp W  &kp E  &kp R  &kp T                                                  &kp Y    &kp U    &kp I     &kp O   &kp P    &kp MINUS
+&hm_ctrl  LCTRL ESC   &kp A  &kp S  &kp D  &kp F  &kp G                                                  &kp H    &kp J    &kp K     &kp L   &td_semi &td_quote
+&kp LSHFT             &kp Z  &kp X  &kp C  &kp V  &kp B    &kp LBKT             &kp RBKT                 &kp N    &kp M    &kp COMMA &kp DOT &kp FSLH &hm_shift RSHFT RET
+                                    &kp LGUI &kp LALT &kp BSPC &lt_space 1 SPACE  &lt_space 2 SPACE &kp BSPC &kp RALT &kp RGUI
+            >;
+        };
+
+        // ----------------------------------------------------------------
+        // Layer 1: Symbols (hold left thumb / Space)
+        // ----------------------------------------------------------------
+        // - Number row: transparent (use Shift+number for !@#$% etc.)
+        // - Special char macros (Mac-only) on row 1
+        // - Brackets/braces clustered on home row
+        // - Parens + backslash on row 3
+        // - Underscore on right hand
+        symbols_layer {
+            display-name = "Sym";
+            bindings = <
+&trans  &trans          &trans          &trans          &trans          &trans                                                  &trans       &trans       &trans       &trans     &trans &trans
+&trans  &kp LS(LA(N8))  &kp LA(EQUAL)   &kp LA(COMMA)   &kp LA(DOT)     &kp LA(X)                                               &kp LA(N2)   &kp LA(G)    &kp LA(R)    &trans     &trans &trans
+&trans  &kp GRAVE       &kp LBRC        &kp RBRC        &kp LBKT        &kp RBKT                                                &kp PIPE     &kp PLUS     &kp MINUS    &kp EQUAL  &trans &trans
+&trans  &trans          &kp LPAR        &kp RPAR        &kp BSLH        &trans      &trans               &trans                 &trans       &trans       &kp UNDER    &trans     &trans &trans
+                                                        &trans          &trans      &trans &trans                       &trans  &trans       &trans       &trans
+            >;
+        };
+
+        // ----------------------------------------------------------------
+        // Layer 2: Nav / Fn / Media (hold right thumb / Space)
+        // ----------------------------------------------------------------
+        // - F1-F12 on top two rows
+        // - Volume + brightness + mute on left home row
+        // - Arrows in inverted-T on right home row + page nav
+        // - Media transport on left bottom row
+        // - Screenshot macros: Cmd+Shift+3 (full) / Cmd+Shift+4 (region)
+        // - Mac desktop switching: Ctrl+Left / Ctrl+Right
+        // - Delete on right hand
+        nav_layer {
+            display-name = "Nav";
+            bindings = <
+&trans  &kp F1        &kp F2        &kp F3      &kp F4           &kp F5                                                       &kp F6   &kp F7        &kp F8        &kp F9   &kp F10 &trans
+&trans  &kp F11       &kp F12       &trans      &trans           &trans                                                       &kp PG_UP &kp HOME     &kp UP        &kp END  &trans  &trans
+&trans  &kp C_VOL_DN  &kp C_VOL_UP  &kp C_MUTE  &kp C_BRI_DN     &kp C_BRI_UP                                                 &kp PG_DN &kp LEFT     &kp DOWN      &kp RIGHT &trans &trans
+&trans  &kp C_PREV    &kp C_PP      &kp C_NEXT  &kp LG(LS(N3))   &kp LG(LS(N4)) &trans                       &trans          &trans   &kp LC(LEFT)  &kp LC(RIGHT) &kp DEL  &trans  &trans
+                                                &trans           &trans         &trans &trans                       &trans   &trans   &trans        &trans
+            >;
+        };
+
+        // ----------------------------------------------------------------
+        // Layer 3: Numpad (toggled from System layer; persistent until untoggled)
+        // ----------------------------------------------------------------
+        // - 3x3 number grid on right hand (numpad style: 7-8-9 / 4-5-6 / 1-2-3)
+        // - 0 on right thumb (where Space was)
+        // - Operators on left home/qwerty rows
+        // - Calculator-friendly chars: ( ) = % . ,
+        // - &to 0 on left thumb to escape back to base
+        // - Most non-essential positions are &none to prevent stray typing
+        numpad_layer {
+            display-name = "Num";
+            bindings = <
+&trans  &none  &none         &none          &none             &none                                                  &none  &none      &none      &none      &none &trans
+&trans  &none  &kp KP_PLUS   &kp KP_MINUS   &kp KP_MULTIPLY   &kp KP_DIVIDE                                          &none  &kp KP_N7  &kp KP_N8  &kp KP_N9  &none &trans
+&trans  &none  &kp LPAR      &kp RPAR       &kp EQUAL         &kp PERCENT                                            &none  &kp KP_N4  &kp KP_N5  &kp KP_N6  &none &trans
+&trans  &none  &kp DOT       &kp COMMA      &none             &none           &none              &none               &none  &kp KP_N1  &kp KP_N2  &kp KP_N3  &none &trans
+                                            &none             &none           &to 0     &trans                &kp KP_N0     &none      &none      &none
+            >;
+        };
+
+        // ----------------------------------------------------------------
+        // Layer 4: System (conditional: hold both Sym + Nav thumbs)
+        // ----------------------------------------------------------------
+        // - Bootloader reset on top-left (deliberately awkward)
+        // - BT clear on top-right (forgets current pairing)
+        // - BT profile select 0-4 on left QWERTY row
+        // - USB / BLE output toggle on left home row
+        // - Numpad toggle + Caps Lock on right home row
+        system_layer {
+            display-name = "Sys";
+            bindings = <
+&sys_reset  &none         &none         &none         &none         &none                                              &none &none &none  &none    &none &bt BT_CLR
+&trans      &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                                       &none &none &none  &none    &none &trans
+&trans      &out OUT_USB  &out OUT_BLE  &none         &none         &none                                              &none &none &tog 3 &kp CAPS &none &trans
+&trans      &none         &none         &none         &none         &none         &none              &none             &none &none &none  &none    &none &trans
+                                        &trans        &trans        &trans        &trans                       &trans  &trans &trans &trans
+            >;
         };
     };
 };
