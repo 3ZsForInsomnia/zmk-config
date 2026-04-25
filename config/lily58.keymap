@@ -158,16 +158,16 @@
         // Layer 1: Symbols (hold left thumb)
         // ----------------------------------------------------------------
         // Row 1 left: ° ≠ ≤ ≥ ≈     Row 1 right: ™ © ®
-        // Row 2: ` ( { } )  |  | + - _   ([ ] inherited from base via inner extras)
-        // Row 3 only: \ on left center
+        // Row 2: ~ \ on left; | + - _ = on right
+        // Row 3: ( { surround [ ] cluster surround } ) — visually adjacent on bottom row
         symbols_layer {
             display-name = "Sym";
             bindings = <
-&trans  &trans     &trans   &trans   &trans   &trans                                                  &trans     &trans    &trans   &trans     &trans &trans
-&trans  &m_degree  &m_neq   &m_leq   &m_geq   &m_approx                                               &m_tm      &m_copy   &m_reg   &trans     &trans &trans
-&trans  &kp GRAVE  &kp LPAR &kp LBRC &kp RBRC &kp RPAR                                                &kp PIPE   &kp PLUS  &kp MINUS &kp UNDER &trans &trans
-&trans  &trans     &trans   &trans   &kp BSLH &trans       &trans                       &trans        &trans     &trans    &trans   &trans     &trans &trans
-                                     &trans   &trans       &trans &trans                       &trans &trans     &trans    &trans
+&trans  &trans     &trans       &trans   &trans   &trans                                                  &trans     &trans    &trans     &trans     &trans &trans
+&trans  &m_degree  &m_neq       &m_leq   &m_geq   &m_approx                                               &m_tm      &m_copy   &m_reg     &trans     &trans &trans
+&trans  &kp TILDE  &kp BSLH     &trans   &trans   &trans                                                  &kp PIPE   &kp PLUS  &kp MINUS  &kp UNDER  &kp EQUAL &trans
+&trans  &trans     &trans       &trans   &kp LPAR &kp LBRC     &trans                       &trans        &kp RBRC   &kp RPAR  &trans     &trans     &trans &trans
+                                         &trans   &trans       &trans &trans                       &trans &trans     &trans    &trans
             >;
         };
 
@@ -193,17 +193,18 @@
         // Layer 3: Numpad (toggle from System layer)
         // ----------------------------------------------------------------
         // 3x3 numpad on right hand: 7-8-9 / 4-5-6 / 1-2-3
-        // Operators on left: + - * / ; ( ) = % ; . ,
-        // 0 on right thumb (where Space lives on base)
-        // &to 0 on left thumb to escape back to base
+        // 0 and . on inner extras of row 3 (calculator-friendly)
+        // Operators on left: + - * / on row 1; ( ) = % on row 2
+        // &to 0 on top-left (where backtick lives on base) to escape back to base
+        // Thumbs and bottom row are &trans — consistent with base
         numpad_layer {
             display-name = "Num";
             bindings = <
-&trans  &none  &none         &none          &none             &none                                                  &none  &none      &none      &none      &none &trans
+&to 0   &none  &none         &none          &none             &none                                                  &none  &none      &none      &none      &none &trans
 &trans  &none  &kp KP_PLUS   &kp KP_MINUS   &kp KP_MULTIPLY   &kp KP_DIVIDE                                          &none  &kp KP_N7  &kp KP_N8  &kp KP_N9  &none &trans
 &trans  &none  &kp LPAR      &kp RPAR       &kp EQUAL         &kp PERCENT                                            &none  &kp KP_N4  &kp KP_N5  &kp KP_N6  &none &trans
-&trans  &none  &kp DOT       &kp COMMA      &none             &none           &none              &none               &none  &kp KP_N1  &kp KP_N2  &kp KP_N3  &none &trans
-                                            &none             &none           &to 0     &trans                &kp KP_N0     &none      &none      &none
+&trans  &none  &kp DOT       &kp COMMA      &none             &none           &kp KP_N0          &kp KP_DOT          &none  &kp KP_N1  &kp KP_N2  &kp KP_N3  &none &trans
+                                            &trans            &trans          &trans  &trans                  &trans        &trans     &trans     &trans
             >;
         };
 
