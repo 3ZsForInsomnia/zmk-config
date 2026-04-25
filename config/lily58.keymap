@@ -5,12 +5,10 @@
 
 / {
     // ============================================================
-    // Custom behaviors: hold-taps and tap-dances
+    // Custom hold-tap behaviors
     // ============================================================
     behaviors {
-        // Hold-tap for Shift on Tab and Shift on Enter.
-        // tap-preferred: short overlap with another key resolves to the tap.
-        // Short term + quick-tap-ms keeps Tab snappy in autocomplete.
+        // Shift on hold, key on tap. For Tab and Enter on base layer.
         hm_shift: hold_mod_shift {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
@@ -20,8 +18,7 @@
             bindings = <&kp>, <&kp>;
         };
 
-        // Hold-tap for Ctrl on Esc (Caps Lock position).
-        // Slightly longer term since Ctrl shortcuts feel better with a firm hold.
+        // Ctrl on hold, key on tap. For Esc on Caps Lock position.
         hm_ctrl: hold_mod_ctrl {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
@@ -31,8 +28,8 @@
             bindings = <&kp>, <&kp>;
         };
 
-        // Layer-tap for Space (snappy: 150ms term, 120ms quick-tap).
-        // Thumbs rarely hold accidentally; safe to be aggressive.
+        // Layer on hold, Space on tap. For thumb-Space layer keys.
+        // Snappy timing — thumbs are decisive.
         lt_space: layer_tap_space {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
@@ -40,6 +37,17 @@
             tapping-term-ms = <150>;
             quick-tap-ms = <120>;
             bindings = <&mo>, <&kp>;
+        };
+
+        // Generic hold-tap: any key on hold, any key on tap.
+        // Used for hyphen/underscore pair.
+        hk_dash: hold_key_dash {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <200>;
+            quick-tap-ms = <150>;
+            bindings = <&kp>, <&kp>;
         };
 
         // Tap = ;  Double-tap = :
@@ -60,6 +68,60 @@
     };
 
     // ============================================================
+    // Macros for Mac-specific special characters
+    // ============================================================
+    macros {
+        // ° (degree) — Opt+Shift+8
+        m_degree: macro_degree {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LS(LA(N8))>;
+        };
+        // ≠ (not equal) — Opt+=
+        m_neq: macro_neq {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LA(EQUAL)>;
+        };
+        // ≤ (less than or equal) — Opt+,
+        m_leq: macro_leq {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LA(COMMA)>;
+        };
+        // ≥ (greater than or equal) — Opt+.
+        m_geq: macro_geq {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LA(DOT)>;
+        };
+        // ≈ (approximately) — Opt+X
+        m_approx: macro_approx {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LA(X)>;
+        };
+        // ™ (trademark) — Opt+2
+        m_tm: macro_tm {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LA(N2)>;
+        };
+        // © (copyright) — Opt+G
+        m_copy: macro_copy {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LA(G)>;
+        };
+        // ® (registered) — Opt+R
+        m_reg: macro_reg {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LA(R)>;
+        };
+    };
+
+    // ============================================================
     // Conditional layer: hold both Sym (1) and Nav (2) → System (4)
     // ============================================================
     conditional_layers {
@@ -70,81 +132,70 @@
         };
     };
 
-    // ============================================================
-    // Keymap: 5 layers
-    // ============================================================
     keymap {
         compatible = "zmk,keymap";
 
         // ----------------------------------------------------------------
         // Layer 0: Base
         // ----------------------------------------------------------------
-        // - Top-left: Tab (tap) / LShift (hold)
-        // - Caps Lock pos: Esc (tap) / LCtrl (hold)
-        // - Right pinky outer: Enter (tap) / RShift (hold)
-        // - Inner extras (row 3): [ and ] for fast bracket access
-        // - Thumbs: LGUI LALT BSPC SPACE/Sym | SPACE/Nav BSPC RALT RGUI
-        // - ; / : and ' / " on home row via tap-dance
+        // Row 0: ` 1 2 3 4 5 | 6 7 8 9 0 =     (= unshifted; + via Shift+=)
+        // Row 1: BSPC Q W E R T | Y U I O P -/_ (hyphen mod-tap to underscore)
+        // Row 2: Esc/Ctrl A S D F G | H J K L ;: '"
+        // Row 3: Tab/Shift Z X C V B [ | ] N M , . / Enter/Shift
+        // Thumbs: LCTRL LALT LGUI Sym/Space | Nav/Space RGUI RALT RCTRL
         base_layer {
             display-name = "Base";
             bindings = <
-&kp ESC               &kp N1 &kp N2 &kp N3 &kp N4 &kp N5                                                 &kp N6   &kp N7   &kp N8    &kp N9  &kp N0   &kp GRAVE
-&hm_shift LSHFT TAB   &kp Q  &kp W  &kp E  &kp R  &kp T                                                  &kp Y    &kp U    &kp I     &kp O   &kp P    &kp MINUS
-&hm_ctrl  LCTRL ESC   &kp A  &kp S  &kp D  &kp F  &kp G                                                  &kp H    &kp J    &kp K     &kp L   &td_semi &td_quote
-&kp LSHFT             &kp Z  &kp X  &kp C  &kp V  &kp B    &kp LBKT             &kp RBKT                 &kp N    &kp M    &kp COMMA &kp DOT &kp FSLH &hm_shift RSHFT RET
-                                    &kp LGUI &kp LALT &kp BSPC &lt_space 1 SPACE  &lt_space 2 SPACE &kp BSPC &kp RALT &kp RGUI
+&kp GRAVE              &kp N1 &kp N2 &kp N3 &kp N4 &kp N5                                                                  &kp N6 &kp N7 &kp N8    &kp N9  &kp N0   &kp EQUAL
+&kp BSPC               &kp Q  &kp W  &kp E  &kp R  &kp T                                                                   &kp Y  &kp U  &kp I     &kp O   &kp P    &hk_dash UNDER MINUS
+&hm_ctrl LCTRL ESC     &kp A  &kp S  &kp D  &kp F  &kp G                                                                   &kp H  &kp J  &kp K     &kp L   &td_semi &td_quote
+&hm_shift LSHFT TAB    &kp Z  &kp X  &kp C  &kp V  &kp B    &kp LBKT                          &kp RBKT                     &kp N  &kp M  &kp COMMA &kp DOT &kp FSLH &hm_shift RSHFT RET
+                                     &kp LCTRL &kp LALT &kp LGUI &lt_space 1 SPACE  &lt_space 2 SPACE &kp RGUI &kp RALT &kp RCTRL
             >;
         };
 
         // ----------------------------------------------------------------
-        // Layer 1: Symbols (hold left thumb / Space)
+        // Layer 1: Symbols (hold left thumb)
         // ----------------------------------------------------------------
-        // - Number row: transparent (use Shift+number for !@#$% etc.)
-        // - Special char macros (Mac-only) on row 1
-        // - Brackets/braces clustered on home row
-        // - Parens + backslash on row 3
-        // - Underscore on right hand
+        // Row 1 left: ° ≠ ≤ ≥ ≈     Row 1 right: ™ © ®
+        // Row 2: ` ( { } )  |  | + - _   ([ ] inherited from base via inner extras)
+        // Row 3 only: \ on left center
         symbols_layer {
             display-name = "Sym";
             bindings = <
-&trans  &trans          &trans          &trans          &trans          &trans                                                  &trans       &trans       &trans       &trans     &trans &trans
-&trans  &kp LS(LA(N8))  &kp LA(EQUAL)   &kp LA(COMMA)   &kp LA(DOT)     &kp LA(X)                                               &kp LA(N2)   &kp LA(G)    &kp LA(R)    &trans     &trans &trans
-&trans  &kp GRAVE       &kp LBRC        &kp RBRC        &kp LBKT        &kp RBKT                                                &kp PIPE     &kp PLUS     &kp MINUS    &kp EQUAL  &trans &trans
-&trans  &trans          &kp LPAR        &kp RPAR        &kp BSLH        &trans      &trans               &trans                 &trans       &trans       &kp UNDER    &trans     &trans &trans
-                                                        &trans          &trans      &trans &trans                       &trans  &trans       &trans       &trans
+&trans  &trans     &trans   &trans   &trans   &trans                                                  &trans     &trans    &trans   &trans     &trans &trans
+&trans  &m_degree  &m_neq   &m_leq   &m_geq   &m_approx                                               &m_tm      &m_copy   &m_reg   &trans     &trans &trans
+&trans  &kp GRAVE  &kp LPAR &kp LBRC &kp RBRC &kp RPAR                                                &kp PIPE   &kp PLUS  &kp MINUS &kp UNDER &trans &trans
+&trans  &trans     &trans   &trans   &kp BSLH &trans       &trans                       &trans        &trans     &trans    &trans   &trans     &trans &trans
+                                     &trans   &trans       &trans &trans                       &trans &trans     &trans    &trans
             >;
         };
 
         // ----------------------------------------------------------------
-        // Layer 2: Nav / Fn / Media (hold right thumb / Space)
+        // Layer 2: Nav / Fn / Media (hold right thumb)
         // ----------------------------------------------------------------
-        // - F1-F12 on top two rows
-        // - Volume + brightness + mute on left home row
-        // - Arrows in inverted-T on right home row + page nav
-        // - Media transport on left bottom row
-        // - Screenshot macros: Cmd+Shift+3 (full) / Cmd+Shift+4 (region)
-        // - Mac desktop switching: Ctrl+Left / Ctrl+Right
-        // - Delete on right hand
+        // Row 0: F1-F12
+        // Row 1 right: PgUp Home ↑ End
+        // Row 2 left: VolDn VolUp Mute BriDn BriUp   right: PgDn ← ↓ →
+        // Row 3 left: Prev Play Next ScrFull ScrRegion   right: DesktopL DesktopR Del
         nav_layer {
             display-name = "Nav";
             bindings = <
-&trans  &kp F1        &kp F2        &kp F3      &kp F4           &kp F5                                                       &kp F6   &kp F7        &kp F8        &kp F9   &kp F10 &trans
-&trans  &kp F11       &kp F12       &trans      &trans           &trans                                                       &kp PG_UP &kp HOME     &kp UP        &kp END  &trans  &trans
-&trans  &kp C_VOL_DN  &kp C_VOL_UP  &kp C_MUTE  &kp C_BRI_DN     &kp C_BRI_UP                                                 &kp PG_DN &kp LEFT     &kp DOWN      &kp RIGHT &trans &trans
-&trans  &kp C_PREV    &kp C_PP      &kp C_NEXT  &kp LG(LS(N3))   &kp LG(LS(N4)) &trans                       &trans          &trans   &kp LC(LEFT)  &kp LC(RIGHT) &kp DEL  &trans  &trans
-                                                &trans           &trans         &trans &trans                       &trans   &trans   &trans        &trans
+&kp F1  &kp F2        &kp F3        &kp F4         &kp F5            &kp F6                                                            &kp F7    &kp F8       &kp F9        &kp F10   &kp F11 &kp F12
+&trans  &trans        &trans        &trans         &trans            &trans                                                            &kp PG_UP &kp HOME     &kp UP        &kp END   &trans  &trans
+&trans  &kp C_VOL_DN  &kp C_VOL_UP  &kp C_MUTE     &kp C_BRI_DN      &kp C_BRI_UP                                                      &kp PG_DN &kp LEFT     &kp DOWN      &kp RIGHT &trans  &trans
+&trans  &kp C_PREV    &kp C_PP      &kp C_NEXT     &kp LG(LS(N3))    &kp LG(LS(N4))   &trans                          &trans          &trans    &kp LC(LEFT) &kp LC(RIGHT) &kp DEL   &trans  &trans
+                                                   &trans            &trans           &trans &trans                       &trans      &trans    &trans       &trans
             >;
         };
 
         // ----------------------------------------------------------------
-        // Layer 3: Numpad (toggled from System layer; persistent until untoggled)
+        // Layer 3: Numpad (toggle from System layer)
         // ----------------------------------------------------------------
-        // - 3x3 number grid on right hand (numpad style: 7-8-9 / 4-5-6 / 1-2-3)
-        // - 0 on right thumb (where Space was)
-        // - Operators on left home/qwerty rows
-        // - Calculator-friendly chars: ( ) = % . ,
-        // - &to 0 on left thumb to escape back to base
-        // - Most non-essential positions are &none to prevent stray typing
+        // 3x3 numpad on right hand: 7-8-9 / 4-5-6 / 1-2-3
+        // Operators on left: + - * / ; ( ) = % ; . ,
+        // 0 on right thumb (where Space lives on base)
+        // &to 0 on left thumb to escape back to base
         numpad_layer {
             display-name = "Num";
             bindings = <
@@ -157,13 +208,13 @@
         };
 
         // ----------------------------------------------------------------
-        // Layer 4: System (conditional: hold both Sym + Nav thumbs)
+        // Layer 4: System (conditional — hold both Sym + Nav thumbs)
         // ----------------------------------------------------------------
-        // - Bootloader reset on top-left (deliberately awkward)
-        // - BT clear on top-right (forgets current pairing)
-        // - BT profile select 0-4 on left QWERTY row
-        // - USB / BLE output toggle on left home row
-        // - Numpad toggle + Caps Lock on right home row
+        // Bootloader on top-left corner
+        // BT clear on top-right corner
+        // BT profiles on left QWERTY row
+        // USB / BLE output toggle on left home row
+        // Numpad toggle (&tog 3) + Caps Lock on right home row
         system_layer {
             display-name = "Sys";
             bindings = <
