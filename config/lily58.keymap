@@ -8,21 +8,13 @@
     // Custom hold-tap behaviors
     // ============================================================
     behaviors {
-        // Shift on hold, key on tap. For Tab and Enter on base layer.
-        hm_shift: hold_mod_shift {
+        // Cmd on hold, key on tap. For Backspace and Enter on the GUI thumbs.
+        // Balanced: pressing and releasing another key while held resolves
+        // as Cmd immediately, so fast Cmd chords don't turn into the tap key.
+        ht_gui: hold_tap_gui {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
-            flavor = "tap-preferred";
-            tapping-term-ms = <175>;
-            quick-tap-ms = <150>;
-            bindings = <&kp>, <&kp>;
-        };
-
-        // Ctrl on hold, key on tap. For Esc on Caps Lock position.
-        hm_ctrl: hold_mod_ctrl {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
-            flavor = "tap-preferred";
+            flavor = "balanced";
             tapping-term-ms = <200>;
             quick-tap-ms = <150>;
             bindings = <&kp>, <&kp>;
@@ -68,60 +60,6 @@
     };
 
     // ============================================================
-    // Macros for Mac-specific special characters
-    // ============================================================
-    macros {
-        // ° (degree) — Opt+Shift+8
-        m_degree: macro_degree {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp LS(LA(N8))>;
-        };
-        // ≠ (not equal) — Opt+=
-        m_neq: macro_neq {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp LA(EQUAL)>;
-        };
-        // ≤ (less than or equal) — Opt+,
-        m_leq: macro_leq {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp LA(COMMA)>;
-        };
-        // ≥ (greater than or equal) — Opt+.
-        m_geq: macro_geq {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp LA(DOT)>;
-        };
-        // ≈ (approximately) — Opt+X
-        m_approx: macro_approx {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp LA(X)>;
-        };
-        // ™ (trademark) — Opt+2
-        m_tm: macro_tm {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp LA(N2)>;
-        };
-        // © (copyright) — Opt+G
-        m_copy: macro_copy {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp LA(G)>;
-        };
-        // ® (registered) — Opt+R
-        m_reg: macro_reg {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp LA(R)>;
-        };
-    };
-
-    // ============================================================
     // Conditional layer: hold both Sym (1) and Nav (2) → System (4)
     // ============================================================
     conditional_layers {
@@ -139,34 +77,36 @@
         // Layer 0: Base
         // ----------------------------------------------------------------
         // Row 0: ` 1 2 3 4 5 | 6 7 8 9 0 =     (= unshifted; + via Shift+=)
-        // Row 1: BSPC Q W E R T | Y U I O P -/_ (hyphen mod-tap to underscore)
-        // Row 2: Esc/Ctrl A S D F G | H J K L ;: '"
-        // Row 3: Tab/Shift Z X C V B [ | ] N M , . / Enter/Shift
-        // Thumbs: LCTRL LALT LGUI Sym/Space | Nav/Space RGUI RALT RCTRL
+        // Row 1: Tab Q W E R T | Y U I O P -/_ (hyphen mod-tap to underscore)
+        // Row 2: Esc A S D F G | H J K L ;: '"
+        // Row 3: LShift Z X C V B [ | ] N M , . / RShift
+        // Thumbs: LCTRL LALT Bspc/LGUI Sym/Space | Nav/Space Enter/RGUI RALT RCTRL
         base_layer {
             display-name = "Base";
             bindings = <
-&kp GRAVE              &kp N1 &kp N2 &kp N3 &kp N4 &kp N5                                                                  &kp N6 &kp N7 &kp N8    &kp N9  &kp N0   &kp EQUAL
-&kp BSPC               &kp Q  &kp W  &kp E  &kp R  &kp T                                                                   &kp Y  &kp U  &kp I     &kp O   &kp P    &hk_dash UNDER MINUS
-&hm_ctrl LCTRL ESC     &kp A  &kp S  &kp D  &kp F  &kp G                                                                   &kp H  &kp J  &kp K     &kp L   &td_semi &td_quote
-&hm_shift LSHFT TAB    &kp Z  &kp X  &kp C  &kp V  &kp B    &kp LBKT                          &kp RBKT                     &kp N  &kp M  &kp COMMA &kp DOT &kp FSLH &hm_shift RSHFT RET
-                                     &kp LCTRL &kp LALT &kp LGUI &lt_space 1 SPACE  &lt_space 2 SPACE &kp RGUI &kp RALT &kp RCTRL
+&kp GRAVE  &kp N1 &kp N2 &kp N3 &kp N4 &kp N5                                                                          &kp N6 &kp N7 &kp N8    &kp N9  &kp N0   &kp EQUAL
+&kp TAB    &kp Q  &kp W  &kp E  &kp R  &kp T                                                                           &kp Y  &kp U  &kp I     &kp O   &kp P    &hk_dash UNDER MINUS
+&kp ESC    &kp A  &kp S  &kp D  &kp F  &kp G                                                                           &kp H  &kp J  &kp K     &kp L   &td_semi &td_quote
+&kp LSHFT  &kp Z  &kp X  &kp C  &kp V  &kp B    &kp LBKT                                  &kp RBKT                     &kp N  &kp M  &kp COMMA &kp DOT &kp FSLH &kp RSHFT
+                         &kp LCTRL &kp LALT &ht_gui LGUI BSPC &lt_space 1 SPACE  &lt_space 2 SPACE &ht_gui RGUI RET &kp RALT &kp RCTRL
             >;
         };
 
         // ----------------------------------------------------------------
         // Layer 1: Symbols (hold left thumb)
         // ----------------------------------------------------------------
-        // Row 1 left: ° ≠ ≤ ≥ ≈     Row 1 right: ™ © ®
-        // Row 2: ~ \ on left; | + - _ = on right
-        // Row 3: ( { surround [ ] cluster surround } ) — visually adjacent on bottom row
+        // Mac symbols are Option combos on the US input source; other input
+        // sources (e.g. Hebrew) map these combos to different characters.
+        // Row 1 left: ° ≠ ≤ ≥ ≈     Row 1 right: ™ © ® € £
+        // Row 2: ~ \ Ω µ ± on left; | + - _ = on right
+        // Row 3: π on left; ( { surround [ ] cluster surround } ) — visually adjacent on bottom row
         symbols_layer {
             display-name = "Sym";
             bindings = <
-&trans  &trans     &trans       &trans   &trans   &trans                                                  &trans     &trans    &trans     &trans     &trans &trans
-&trans  &m_degree  &m_neq       &m_leq   &m_geq   &m_approx                                               &m_tm      &m_copy   &m_reg     &trans     &trans &trans
-&trans  &kp TILDE  &kp BSLH     &trans   &trans   &trans                                                  &kp PIPE   &kp PLUS  &kp MINUS  &kp UNDER  &kp EQUAL &trans
-&trans  &trans     &trans       &trans   &kp LPAR &kp LBRC     &trans                       &trans        &kp RBRC   &kp RPAR  &trans     &trans     &trans &trans
+&trans  &trans          &trans          &trans          &trans            &trans                                                  &trans      &trans    &trans     &trans          &trans     &trans
+&trans  &kp LS(LA(N8))  &kp LA(EQUAL)   &kp LA(COMMA)   &kp LA(DOT)       &kp LA(X)                                               &kp LA(N2)  &kp LA(G) &kp LA(R)  &kp LS(LA(N2))  &kp LA(N3) &trans
+&trans  &kp TILDE       &kp BSLH        &kp LA(Z)       &kp LA(M)         &kp LS(LA(EQUAL))                                       &kp PIPE    &kp PLUS  &kp MINUS  &kp UNDER       &kp EQUAL  &trans
+&trans  &trans          &trans          &kp LA(P)       &kp LPAR          &kp LBRC          &trans                       &trans   &kp RBRC    &kp RPAR  &trans     &trans          &trans     &trans
                                          &trans   &trans       &trans &trans                       &trans &trans     &trans    &trans
             >;
         };
@@ -215,13 +155,13 @@
         // BT clear on top-right corner
         // BT profiles on left QWERTY row
         // USB / BLE output toggle on left home row
-        // Numpad toggle (&tog 3) + Caps Lock on right home row
+        // Globe (macOS input source switch), Numpad toggle (&tog 3), Caps Lock on right home row
         system_layer {
             display-name = "Sys";
             bindings = <
-&sys_reset  &none         &none         &none         &none         &none                                              &none &none &none  &none    &none &bt BT_CLR
-&trans      &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                                       &none &none &none  &none    &none &trans
-&trans      &out OUT_USB  &out OUT_BLE  &none         &none         &none                                              &none &none &tog 3 &kp CAPS &none &trans
+&sys_reset  &none         &none         &none         &none         &none                                              &none      &none &none  &none    &none &bt BT_CLR
+&trans      &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                                       &none      &none &none  &none    &none &trans
+&trans      &out OUT_USB  &out OUT_BLE  &none         &none         &none                                              &kp GLOBE  &none &tog 3 &kp CAPS &none &trans
 &trans      &none         &none         &none         &none         &none         &none              &none             &none &none &none  &none    &none &trans
                                         &trans        &trans        &trans        &trans                       &trans  &trans &trans &trans
             >;
